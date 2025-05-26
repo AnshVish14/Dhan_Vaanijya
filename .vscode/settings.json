@@ -1,0 +1,6 @@
+{
+  "java.configuration.updateBuildConfiguration": "automatic",
+  "terminal.integrated.env.windows": {
+    "PATH": "C:\\apache-maven-3.9.9\\bin;${env:PATH}"
+  }
+}
