@@ -1,5 +1,5 @@
 package com.dhanvaanijya.data;
 
-public class StockFetcher {
+public class Transactions {
     
 }

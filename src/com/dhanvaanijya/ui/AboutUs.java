@@ -1,15 +1,16 @@
-package com.dhanvaanijya.logic;
+package com.dhanvaanijya.ui;
 import javax.swing.*;
 import java.awt.*;
-public class Stockpredict extends JPanel {
-     public Stockpredict(){
 
+public class AboutUs extends JPanel{
+    
+    public AboutUs(){
         setLayout(new BorderLayout());
         setBackground(Color.WHITE);
         JLabel l = new JLabel();
         l.setFont(new Font("Arial", Font.BOLD, 20));
         l.setBackground(Color.GRAY);
-        l.setText("Stock Prediction");
+        l.setText("ABOUTUS");
         add(l,BorderLayout.CENTER);
-    }
+    } 
 }
