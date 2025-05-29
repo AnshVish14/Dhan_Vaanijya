@@ -3,14 +3,18 @@ package com.dhanvaanijya.ui;
 import java.awt.*;
 import javax.swing.*;
 
+import com.dhanvaanijya.data.Portfolio;
+import com.dhanvaanijya.data.Transactions;
+import com.dhanvaanijya.logic.Analyzer;
 import com.dhanvaanijya.logic.Sentiment;
 import com.dhanvaanijya.logic.Stockpredict;
+// Import Analyzer if it exists in the ui package or correct package
 
 public class Dashboard extends JFrame {
 
     // Sidebar menu items
     String[] menu = {
-        "HOME", "Stock_analyser", "Stock_Prediction", "Portfolio",
+        "HOME", "Analyzer", "Stockpredict", "Portfolio",
         "Transactions", "Sentiment", "Setting", "About Us", "Exit"
     };
     CardLayout CARD = new CardLayout();
@@ -60,7 +64,10 @@ public class Dashboard extends JFrame {
     mainPanel.add(new AboutUs(), "AboutUs");
     mainPanel.add(new Setting(), "Setting");
     mainPanel.add(new Sentiment(),"Sentiment");
-    mainPanel.add(new Stockpredict(), "Stock_Prediction");
+    mainPanel.add(new Stockpredict(), "Stockpredict");
+    mainPanel.add(new Analyzer(), "Analyzer");
+    mainPanel.add(new Portfolio(), "Portfolio");
+    mainPanel.add(new Transactions() , "Transactions");
 
     for (String label : menu) {
         JButton button = new JButton(label);
@@ -83,8 +90,17 @@ public class Dashboard extends JFrame {
                 case "Sentiment":
                     CARD.show(mainPanel, "Sentiment");
                     break;
-                case "Stock_Prediction":
-                    CARD.show(mainPanel, "Stock_Prediction");
+                case "Stockpredict":
+                    CARD.show(mainPanel, "Stockpredict");
+                    break;
+                case "Analyzer" :
+                    CARD.show(mainPanel,"Analyzer");
+                    break;
+                case "Portfolio":
+                    CARD.show(mainPanel,"Portfolio");
+                    break;
+                case "Transactions":
+                    CARD.show(mainPanel,"Transactions");
                     break;
                 case "Exit":
                     JOptionPane.showMessageDialog(this, "Exiting application");
