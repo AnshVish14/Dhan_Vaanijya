@@ -3,7 +3,7 @@ package com.dhanvaanijya.ui;
 import java.awt.*;
 import javax.swing.*;
 
-import com.dhanvaanijya.data.Portfolio;
+import com.dhanvaanijya.data.StockWatchlist;
 import com.dhanvaanijya.logic.Sentiment;
 import com.dhanvaanijya.logic.Stockpredict;
 
@@ -11,7 +11,7 @@ public class Dashboard extends JFrame {
 
     // Sidebar menu items
     String[] menu = {
-        "HOME", "Stockpredict", "Portfolio",
+        "HOME", "Stockpredict", "StockWatchlist",
         "Sentiment", "Setting", "About Us", "Exit"
     };
     CardLayout CARD = new CardLayout();
@@ -59,7 +59,7 @@ public class Dashboard extends JFrame {
         mainPanel.add(new Sentiment(), "Sentiment");
         mainPanel.add(new Stockpredict(), "Stockpredict");
        
-        mainPanel.add(new Portfolio(), "Portfolio");
+        mainPanel.add(new StockWatchlist(), "StockWatchlist");
 
 
         for (String label : menu) {
@@ -86,15 +86,10 @@ public class Dashboard extends JFrame {
                     case "Stockpredict":
                         CARD.show(mainPanel, "Stockpredict");
                         break;
-                    case "Analyzer":
-                        CARD.show(mainPanel, "Analyzer");
+                    case "StockWatchlist":
+                        CARD.show(mainPanel, "StockWatchlist");
                         break;
-                    case "Portfolio":
-                        CARD.show(mainPanel, "Portfolio");
-                        break;
-                    case "Transactions":
-                        CARD.show(mainPanel, "Transactions");
-                        break;
+                   
                     case "Exit":
                         JOptionPane.showMessageDialog(this, "Exiting application");
                         System.exit(0);
