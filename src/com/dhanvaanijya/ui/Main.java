@@ -14,7 +14,6 @@ public class Main {
             e.printStackTrace();
         }
 
-        // Launch GUI
         javax.swing.SwingUtilities.invokeLater(() -> {
             new Dashboard().setVisible(true);
         });

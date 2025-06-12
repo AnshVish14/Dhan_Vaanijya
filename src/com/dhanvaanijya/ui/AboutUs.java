@@ -23,7 +23,7 @@ public class AboutUs extends JPanel {
                 "- Real-time analytics\n" +
                 "- Customizable workflows\n"+ 
                 "Version : 1.0.0 \n"
-        +"\n Developed by : ANSH VISHWKARMA(TEAM DHANVAANIJYA)\n"
+        +"\n Developed by : ANSH VISHWKARMA (TEAM DHANVAANIJYA)\n"
         +"\n Contact Details :\n" 
         +"\n Contectno. : +91\n"
         +"\n Email : \n"
