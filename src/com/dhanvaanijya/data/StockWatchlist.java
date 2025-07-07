@@ -10,7 +10,7 @@ public class StockWatchlist extends JPanel{
         JLabel l = new JLabel();
         l.setFont(new Font("Arial", Font.BOLD, 20));
         l.setBackground(Color.GRAY);
-        l.setText(" stock saved watch list ");
+        l.setText(" stock saved watch list comming in next update ");
         add(l,BorderLayout.CENTER); 
     }
 }

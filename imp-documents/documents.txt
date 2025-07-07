@@ -1,0 +1,14 @@
+** Welcome to Dhanvaanijya **
+
+A stock prediction application developed by uisng the java and some backend python integration.
+
+Developed by :
+Ansh Vishwakarma
+Btech student 
+
+* The command to run the python server : " python -m uvicorn main:app --reload "
+
+Note: It is a basic information about ther Dhanvaanijya and more detailed information is updated soon.
+
+
+*/-------------------------------------------JAI HIND-----------------------------------------------\*

@@ -2,125 +2,120 @@ package com.dhanvaanijya.ui;
 
 import java.awt.*;
 import javax.swing.*;
-
+import javax.swing.border.*;
 import com.dhanvaanijya.data.StockWatchlist;
-import com.dhanvaanijya.logic.Sentiment;
 import com.dhanvaanijya.logic.Stockpredict;
+import com.dhanvaanijya.logic.stocklistpanel;
 
 public class Dashboard extends JFrame {
 
-    // Sidebar menu items
     String[] menu = {
-        "HOME", "Stockpredict", "StockWatchlist",
-        "Sentiment", "Setting", "About Us", "Exit"
+        "HOME", "Stockpredict", "StockWatchlist", "stocklistpanel",
+        "Setting", "About Us", "Exit"
     };
-    CardLayout CARD = new CardLayout();
+
+    private CardLayout CARD = new CardLayout();
     private JPanel mainPanel;
 
     public Dashboard() {
-        setTitle("DHAN_VAANIJYA");
+        setTitle("DHAN VAANIJYA - Stock Assistant");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setSize(1000, 700);
         setLocationRelativeTo(null);
-        setSize(800, 690);
+        setResizable(true);
         initUI();
-
-        setVisible(true);
     }
 
     private void initUI() {
-        // Top bar
-        JPanel titleBar = new JPanel();
-        titleBar.setBackground(new Color(30, 144, 255));
+        // ----- Top Bar -----
+        JPanel titleBar = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2d = (Graphics2D) g;
+                g2d.setPaint(new GradientPaint(0, 0, new Color(30, 144, 255), getWidth(), getHeight(), new Color(65, 105, 225)));
+                g2d.fillRect(0, 0, getWidth(), getHeight());
+            }
+        };
         titleBar.setPreferredSize(new Dimension(getWidth(), 60));
-        titleBar.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 15));
+        titleBar.setLayout(new FlowLayout(FlowLayout.LEFT, 20, 10));
 
-        JLabel title = new JLabel("DHAN VAANIJYA");
-        title.setFont(new Font("Arial", Font.BOLD, 25));
+        JLabel title = new JLabel("💹 DHAN VAANIJYA");
+        title.setFont(new Font("Segoe UI", Font.BOLD, 24));
         title.setForeground(Color.WHITE);
         titleBar.add(title);
 
-        // Sidebar
+        // ----- Sidebar -----
         JPanel sidebar = new JPanel();
-        sidebar.setBackground(new Color(100, 150, 200));
-        sidebar.setPreferredSize(new Dimension(250, getHeight()));
-        sidebar.setLayout(new GridLayout(menu.length, 1, 6, 6));
-
-        mainPanel = new JPanel(CARD);
-        mainPanel.setBackground(Color.WHITE);
-
-        // Cards
-        JPanel homePanel = new JPanel();
-        homePanel.setLayout(new BorderLayout());
-        homePanel.add(new JLabel("Welcome to DHAN VAANIJYA", SwingConstants.CENTER), BorderLayout.CENTER);
-
-        mainPanel.add(homePanel, "HOME");
-        mainPanel.add(new AboutUs(), "AboutUs");
-        mainPanel.add(new Setting(), "Setting");
-        mainPanel.add(new Sentiment(), "Sentiment");
-        mainPanel.add(new Stockpredict(), "Stockpredict");
-       
-        mainPanel.add(new StockWatchlist(), "StockWatchlist");
-
+        sidebar.setBackground(new Color(240, 248, 255));
+        sidebar.setPreferredSize(new Dimension(220, getHeight()));
+        sidebar.setLayout(new GridLayout(menu.length, 1, 5, 5));
+        sidebar.setBorder(new EmptyBorder(15, 10, 10, 10));
 
         for (String label : menu) {
             JButton button = new JButton(label);
             button.setFocusPainted(false);
-            button.setBackground(Color.WHITE);
-            button.setFont(new Font("Times New Roman", Font.BOLD, 16));
-            button.setForeground(Color.BLUE);
+            button.setFont(new Font("Segoe UI", Font.BOLD, 16));
+            button.setForeground(new Color(30, 60, 120));
+            button.setBackground(new Color(255, 255, 255));
+            button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            button.setBorder(BorderFactory.createCompoundBorder(
+                new LineBorder(new Color(180, 200, 255), 1, true),
+                new EmptyBorder(10, 20, 10, 20)
+            ));
+
+            // Hover effect
+            button.addMouseListener(new java.awt.event.MouseAdapter() {
+                public void mouseEntered(java.awt.event.MouseEvent evt) {
+                    button.setBackground(new Color(200, 220, 255));
+                }
+
+                public void mouseExited(java.awt.event.MouseEvent evt) {
+                    button.setBackground(Color.WHITE);
+                }
+            });
 
             button.addActionListener(e -> {
                 switch (label) {
-                    case "About Us":
-                        CARD.show(mainPanel, "AboutUs");
-                        break;
-                    case "HOME":
-                        CARD.show(mainPanel, "HOME");
-                        break;
-                    case "Setting":
-                        CARD.show(mainPanel, "Setting");
-                        break;
-                    case "Sentiment":
-                        CARD.show(mainPanel, "Sentiment");
-                        break;
-                    case "Stockpredict":
-                        CARD.show(mainPanel, "Stockpredict");
-                        break;
-                    case "StockWatchlist":
-                        CARD.show(mainPanel, "StockWatchlist");
-                        break;
-                   
+                    case "HOME": CARD.show(mainPanel, "HOME"); break;
+                    case "Stockpredict": CARD.show(mainPanel, "Stockpredict"); break;
+                    case "StockWatchlist": CARD.show(mainPanel, "StockWatchlist"); break;
+                    case "stocklistpanel": CARD.show(mainPanel, "stocklistpanel"); break;
+                    case "Setting": CARD.show(mainPanel, "Setting"); break;
+                    case "About Us": CARD.show(mainPanel, "AboutUs"); break;
                     case "Exit":
-                        JOptionPane.showMessageDialog(this, "Exiting application");
-                        System.exit(0);
+                        int confirm = JOptionPane.showConfirmDialog(this, "Are you sure you want to exit?", "Exit App", JOptionPane.YES_NO_OPTION);
+                        if (confirm == JOptionPane.YES_OPTION) System.exit(0);
                         break;
                     default:
-                        JOptionPane.showMessageDialog(this, label + " coming soon!");
+                        JOptionPane.showMessageDialog(this, label + " - Coming Soon!");
                 }
             });
 
             sidebar.add(button);
         }
 
-        sidebar.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 20));
+        // ----- Main Panel -----
+        mainPanel = new JPanel(CARD);
+        mainPanel.setBackground(Color.WHITE);
 
+        JPanel homePanel = new JPanel(new BorderLayout());
+        JLabel welcome = new JLabel("<html><center><h1>Welcome to <font color='#1e90ff'>DHAN VAANIJYA</font></h1><p>The prediction tool for the traders.</p></center></html>", SwingConstants.CENTER);
+        welcome.setFont(new Font("Segoe UI", Font.PLAIN, 20));
+        homePanel.add(welcome, BorderLayout.CENTER);
+
+        mainPanel.add(homePanel, "HOME");
+        mainPanel.add(new AboutUs(), "AboutUs");
+        mainPanel.add(new Setting(), "Setting");
+        mainPanel.add(new Stockpredict(), "Stockpredict");
+        mainPanel.add(new stocklistpanel(), "stocklistpanel");
+        mainPanel.add(new StockWatchlist(), "StockWatchlist");
+
+        // ----- Add Panels to Frame -----
         add(titleBar, BorderLayout.NORTH);
         add(sidebar, BorderLayout.WEST);
         add(mainPanel, BorderLayout.CENTER);
-    }
 
-    // ✅ Custom Background Panel Class
-    class BackgroundPanel extends JPanel {
-        private Image bg;
-
-        public BackgroundPanel(String imagePath) {
-            bg = new ImageIcon(imagePath).getImage();
-        }
-
-        @Override
-        protected void paintComponent(Graphics g) {
-            super.paintComponent(g);
-            g.drawImage(bg, 0, 0, getWidth(), getHeight(), this);
-        }
+        CARD.show(mainPanel, "HOME");
     }
 }
