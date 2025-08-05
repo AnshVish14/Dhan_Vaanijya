@@ -20,7 +20,7 @@ public class Main {
 
         showSplashScreen(4000); // Show animated splash screen
 
-        SwingUtilities.invokeLater(() -> new Dashboard().setVisible(true));
+        SwingUtilities.invokeLater(() -> new loginregister().setVisible(true));
     }
 
     private static void showSplashScreen(int durationMs) {

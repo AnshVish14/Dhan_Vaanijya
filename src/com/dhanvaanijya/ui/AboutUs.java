@@ -51,12 +51,12 @@ public class AboutUs extends JPanel {
           + "    Version: 1.0.0\n"
           + "    Developed by: Ansh Vishwakarma (Team Dhan Vaanijya)\n\n"
           + "    Contact:\n"
-          + "   • Phone: +91-XXXXXXXXXX\n"
-          + "   • Email: support@dhanvaanijya.com\n\n"
+          + "   • Phone: +91-6262644418\n"
+          + "   • Email: vishwakarmaansh014@gmail.com\n\n"
           + "   Technologies Used:\n"
           + "   • Java (Swing UI)\n"
           + "   • Python (Backend ML)\n"
-          + " For more information, visit our website or contact our support team."
+          + " For more information, visit our website"
         );
 
         JScrollPane scrollPane = new JScrollPane(aboutText);
