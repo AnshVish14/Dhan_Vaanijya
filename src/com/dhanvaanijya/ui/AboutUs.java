@@ -48,7 +48,7 @@ public class AboutUs extends JPanel {
           + "   • Real-time stock prediction using ML backend\n"
           + "   • News sentiment analysis and stock impact estimation\n"
           + "   • Portfolio & Watchlist management\n\n"
-          + "    Version: 1.0.0\n"
+          + "    Version: 1.2 \n"
           + "    Developed by: Ansh Vishwakarma (Team Dhan Vaanijya)\n\n"
           + "    Contact:\n"
           + "   • Phone: +91-6262644418\n"

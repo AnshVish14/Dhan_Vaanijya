@@ -1,23 +1,26 @@
 package com.dhanvaanijya.logic;
+import com.dhanvaanijya.logic.Stockpredict;
 
 import javax.swing.*;
 import javax.swing.border.*;
 import java.awt.*;
 import java.io.*;
 import java.net.*;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import org.json.JSONObject;
-import org.json.JSONArray;
+import java.util.*;
+import org.json.*;
 
 public class stocklistpanel extends JPanel {
-    private static final String API_KEY = "d18na0hr01qt6geqar8gd18na0hr01qt6geqar90"; // Replace with your key
+    private static final String API_KEY = "d2e5uqpr01qjrul67aggd2e5uqpr01qjrul67ah0";
     private static final String API_URL = "https://finnhub.io/api/v1/stock/symbol?exchange=US&token=" + API_KEY;
 
-    private DefaultListModel<String> stockmodel = new DefaultListModel<>();
-    private JList<String> stock;
+    private DefaultListModel<String> stockModel = new DefaultListModel<>();
+    private java.util.List<String> fullStockList = new ArrayList<>();
+    private java.util.List<String> lastSuccessfulStockList = new ArrayList<>();
+    private JList<String> stockList;
     private JTextArea detailArea;
     private JLabel loadingLabel;
+    private JTextField searchField;
+    private JButton predictButton;
 
     public stocklistpanel() {
         setLayout(new BorderLayout(15, 15));
@@ -31,23 +34,31 @@ public class stocklistpanel extends JPanel {
         header.setBorder(BorderFactory.createEmptyBorder(10, 10, 20, 10));
         add(header, BorderLayout.NORTH);
 
-        // Stock List with custom renderer for better look
-        stock = new JList<>(stockmodel);
-        stock.setFont(new Font("Consolas", Font.PLAIN, 14));
-        stock.setForeground(new Color(25, 25, 112));
-        stock.setBackground(Color.WHITE);
-        stock.setSelectionBackground(new Color(100, 149, 237)); // Cornflower blue
-        stock.setSelectionForeground(Color.WHITE);
-        stock.setBorder(new LineBorder(new Color(30, 144, 255), 2, true));
-        stock.setFixedCellHeight(28);
-        stock.setCellRenderer(new StockListCellRenderer());
+        // Search field
+        searchField = new JTextField();
+        searchField.setFont(new Font("Consolas", Font.PLAIN, 14));
+        searchField.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(30, 144, 255), 2, true),
+                BorderFactory.createEmptyBorder(4, 10, 4, 10)
+        ));
+        searchField.setToolTipText("Search stock by symbol or name...");
 
-        JScrollPane scrollPane = new JScrollPane(stock);
-        scrollPane.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
+        // Stock list
+        stockList = new JList<>(stockModel);
+        stockList.setFont(new Font("Consolas", Font.PLAIN, 14));
+        stockList.setSelectionBackground(new Color(100, 149, 237));
+        stockList.setSelectionForeground(Color.WHITE);
+        stockList.setBorder(new LineBorder(new Color(30, 144, 255), 2, true));
+        JScrollPane scrollPane = new JScrollPane(stockList);
         scrollPane.getViewport().setBackground(Color.WHITE);
-        add(scrollPane, BorderLayout.CENTER);
 
-        // Detail area with background and padding
+        // Center panel
+        JPanel centerPanel = new JPanel(new BorderLayout());
+        centerPanel.add(searchField, BorderLayout.NORTH);
+        centerPanel.add(scrollPane, BorderLayout.CENTER);
+        add(centerPanel, BorderLayout.CENTER);
+
+        // Detail area
         detailArea = new JTextArea();
         detailArea.setEditable(false);
         detailArea.setLineWrap(true);
@@ -55,77 +66,165 @@ public class stocklistpanel extends JPanel {
         detailArea.setFont(new Font("Consolas", Font.PLAIN, 14));
         detailArea.setBackground(new Color(240, 245, 255));
         detailArea.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createTitledBorder(BorderFactory.createLineBorder(new Color(100, 120, 180), 2), "Stock Details"),
-            BorderFactory.createEmptyBorder(10, 10, 10, 10)
+                BorderFactory.createTitledBorder(BorderFactory.createLineBorder(new Color(100, 120, 180), 2), "Stock Details"),
+                BorderFactory.createEmptyBorder(10, 10, 10, 10)
         ));
-
         JScrollPane detailScroll = new JScrollPane(detailArea);
         detailScroll.setPreferredSize(new Dimension(350, 220));
-        detailScroll.setBorder(BorderFactory.createEmptyBorder());
         add(detailScroll, BorderLayout.SOUTH);
 
-        // Loading label (hidden by default)
+        // Loading label
         loadingLabel = new JLabel("Loading...", SwingConstants.CENTER);
         loadingLabel.setFont(new Font("Segoe UI", Font.ITALIC, 14));
-        loadingLabel.setForeground(new Color(80, 80, 80));
         loadingLabel.setVisible(false);
         add(loadingLabel, BorderLayout.EAST);
 
+        // Top panel for button with header
+        JPanel topButtonPanel = new JPanel(new BorderLayout());
+        topButtonPanel.setOpaque(true);
+        topButtonPanel.setBackground(new Color(173, 216, 230)); // light blue header background
+
+        JLabel headerLabel = new JLabel("Stock Prediction", SwingConstants.CENTER);
+        headerLabel.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        headerLabel.setForeground(Color.BLACK);
+        headerLabel.setBackground(new Color(30, 60, 120));
+        headerLabel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        topButtonPanel.add(headerLabel, BorderLayout.NORTH);
+        
+
+        // Button panel aligned to the right
+        JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 20, 5));
+        btnPanel.setOpaque(false);
+
+        predictButton = new JButton("Stock Predict");
+        predictButton.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        predictButton.setForeground(Color.BLACK); // text color
+        predictButton.setBackground(new Color(173, 216, 230)); // light blue
+        predictButton.setFocusPainted(false);
+        predictButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        predictButton.setOpaque(true);
+
+        // Animation effect on hover
+        predictButton.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                predictButton.setBackground(new Color(135, 206, 250)); // hover color
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                predictButton.setBackground(new Color(173, 216, 230)); // original color
+            }
+        });
+
+        btnPanel.add(predictButton);
+        topButtonPanel.add(btnPanel, BorderLayout.SOUTH);
+
+        add(topButtonPanel, BorderLayout.NORTH);
+
+        // Fetch stocks
         fetchStocks();
 
-        stock.addListSelectionListener(e -> {
+        // Stock selection listener
+        stockList.addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
-                String selected = stock.getSelectedValue();
-                if (selected != null && !selected.equals("Failed to fetch stock data.")) {
+                String selected = stockList.getSelectedValue();
+                if (selected != null && !selected.contains("Failed") && !selected.contains("Network timeout")) {
                     String symbol = selected.split(" - ")[0].trim();
                     fetchStockDetails(symbol);
                 }
             }
         });
+
+        // Search filter
+        searchField.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+            private void filterList() {
+                String query = searchField.getText().toLowerCase();
+                stockModel.clear();
+                for (String item : fullStockList) {
+                    if (item.toLowerCase().contains(query)) stockModel.addElement(item);
+                }
+            }
+            @Override public void insertUpdate(javax.swing.event.DocumentEvent e) { filterList(); }
+            @Override public void removeUpdate(javax.swing.event.DocumentEvent e) { filterList(); }
+            @Override public void changedUpdate(javax.swing.event.DocumentEvent e) { filterList(); }
+        });
+
+        // Stock Predict action
+        predictButton.addActionListener(e -> {
+            String selected = stockList.getSelectedValue();
+            if (selected == null || selected.contains("Failed") || selected.contains("Network timeout")) {
+                JOptionPane.showMessageDialog(this, "Please select a valid stock first.", "No Stock Selected", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+            String symbol = selected.split(" - ")[0].trim();
+            String details = detailArea.getText();
+
+            JFrame predictFrame = new JFrame("Stock Prediction for " + symbol);
+            Stockpredict spPanel = new Stockpredict();
+            spPanel.prefillFields(symbol, details);
+
+            predictFrame.setContentPane(spPanel);
+            predictFrame.setSize(900, 500);
+            predictFrame.setLocationRelativeTo(null);
+            predictFrame.setVisible(true);
+        });
     }
 
     private void fetchStocks() {
         loadingLabel.setVisible(true);
-        stockmodel.clear();
+        stockModel.clear();
+        fullStockList.clear();
 
         SwingWorker<Void, Void> worker = new SwingWorker<>() {
             @Override
             protected Void doInBackground() {
-                try {
-                    URI uri = URI.create(API_URL);
-                    URL url = uri.toURL();
-                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                    conn.setRequestMethod("GET");
+                int attempts = 0;
+                while (attempts < 3) {
+                    try {
+                        HttpURLConnection conn = (HttpURLConnection) new URL(API_URL).openConnection();
+                        conn.setRequestMethod("GET");
+                        conn.setConnectTimeout(10000);
+                        conn.setReadTimeout(10000);
 
-                    BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-                    StringBuilder response = new StringBuilder();
-                    String inputLine;
+                        int status = conn.getResponseCode();
+                        if (status != 200) throw new IOException("HTTP Response code: " + status);
 
-                    while ((inputLine = in.readLine()) != null) {
-                        response.append(inputLine);
+                        BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                        StringBuilder response = new StringBuilder();
+                        String line;
+                        while ((line = in.readLine()) != null) response.append(line);
+                        in.close();
+
+                        JSONArray stocks = new JSONArray(response.toString());
+                        for (int i = 0; i < Math.min(stocks.length(), 200); i++) {
+                            JSONObject stock = stocks.getJSONObject(i);
+                            String symbol = stock.getString("symbol");
+                            String desc = stock.getString("description");
+                            String display = symbol + " - " + desc;
+                            fullStockList.add(display);
+                            stockModel.addElement(display);
+                        }
+                        lastSuccessfulStockList.clear();
+                        lastSuccessfulStockList.addAll(fullStockList);
+                        return null; // success
+                    } catch (SocketTimeoutException e) {
+                        attempts++;
+                        if (attempts < 3) try { Thread.sleep(2000); } catch (InterruptedException ignored) {}
+                    } catch (Exception e) {
+                        attempts = 3;
+                        stockModel.addElement("Failed to fetch stock data: " + e.getMessage());
                     }
-                    in.close();
-
-                    JSONArray stocks = new JSONArray(response.toString());
-
-                    for (int i = 0; i < Math.min(stocks.length(), 100); i++) {
-                        JSONObject stock = stocks.getJSONObject(i);
-                        String symbol = stock.getString("symbol");
-                        String desc = stock.getString("description");
-                        stockmodel.addElement(symbol + " - " + desc);
-                    }
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    stockmodel.addElement("Failed to fetch stock data.");
+                }
+                if (!lastSuccessfulStockList.isEmpty()) {
+                    stockModel.clear();
+                    for (String s : lastSuccessfulStockList) stockModel.addElement(s);
+                    stockModel.addElement("Displayed last cached data due to network issue.");
+                } else {
+                    stockModel.addElement("Network timeout. Please check your connection.");
                 }
                 return null;
             }
 
             @Override
-            protected void done() {
-                loadingLabel.setVisible(false);
-            }
+            protected void done() { loadingLabel.setVisible(false); }
         };
         worker.execute();
     }
@@ -135,106 +234,75 @@ public class stocklistpanel extends JPanel {
         loadingLabel.setVisible(true);
 
         SwingWorker<Void, Void> worker = new SwingWorker<>() {
-            String detailsText = "";
+            String details = "";
 
             @Override
             protected Void doInBackground() {
-                try {
-                    // 1. Quote API: current and past price
-                    URI quoteUri = new URI("https", "finnhub.io", "/api/v1/quote", "symbol=" + symbol + "&token=" + API_KEY, null);
-                    URL quoteUrl = quoteUri.toURL();
-                    HttpURLConnection quoteConn = (HttpURLConnection) quoteUrl.openConnection();
-                    quoteConn.setRequestMethod("GET");
+                int attempts = 0;
+                while (attempts < 3) {
+                    try {
+                        URL quoteUrl = new URL("https://finnhub.io/api/v1/quote?symbol=" + symbol + "&token=" + API_KEY);
+                        HttpURLConnection quoteConn = (HttpURLConnection) quoteUrl.openConnection();
+                        quoteConn.setRequestMethod("GET");
+                        quoteConn.setConnectTimeout(10000);
+                        quoteConn.setReadTimeout(10000);
 
-                    BufferedReader quoteIn = new BufferedReader(new InputStreamReader(quoteConn.getInputStream()));
-                    StringBuilder quoteResponse = new StringBuilder();
-                    String quoteLine;
-                    while ((quoteLine = quoteIn.readLine()) != null) {
-                        quoteResponse.append(quoteLine);
+                        BufferedReader qIn = new BufferedReader(new InputStreamReader(quoteConn.getInputStream()));
+                        StringBuilder qRes = new StringBuilder();
+                        String line;
+                        while ((line = qIn.readLine()) != null) qRes.append(line);
+                        qIn.close();
+
+                        JSONObject qJson = new JSONObject(qRes.toString());
+                        double current = qJson.optDouble("c", -1);
+                        double prev = qJson.optDouble("pc", -1);
+
+                        URL newsUrl = new URL("https://finnhub.io/api/v1/company-news?symbol=" + symbol +
+                                "&from=" + java.time.LocalDate.now().minusDays(7) +
+                                "&to=" + java.time.LocalDate.now() +
+                                "&token=" + API_KEY);
+                        HttpURLConnection newsConn = (HttpURLConnection) newsUrl.openConnection();
+                        newsConn.setRequestMethod("GET");
+                        newsConn.setConnectTimeout(10000);
+                        newsConn.setReadTimeout(10000);
+
+                        BufferedReader nIn = new BufferedReader(new InputStreamReader(newsConn.getInputStream()));
+                        StringBuilder nRes = new StringBuilder();
+                        while ((line = nIn.readLine()) != null) nRes.append(line);
+                        nIn.close();
+
+                        JSONArray newsArr = new JSONArray(nRes.toString());
+                        StringBuilder newsText = new StringBuilder();
+                        if (newsArr.length() == 0) newsText.append("No recent news available.");
+                        else for (int i = 0; i < Math.min(newsArr.length(), 5); i++)
+                            newsText.append("• ").append(newsArr.getJSONObject(i).optString("headline")).append("\n");
+
+                        details = "Symbol: " + symbol + "\nPrevious Close: " + prev + "\nCurrent Price: " + current +
+                                "\n\nRecent News:\n" + newsText.toString();
+                        return null; // success
+                    } catch (SocketTimeoutException e) {
+                        attempts++;
+                        if (attempts < 3) try { Thread.sleep(2000); } catch (InterruptedException ignored) {}
+                    } catch (Exception e) {
+                        attempts = 3;
+                        details = "Failed to fetch details: " + e.getMessage();
                     }
-                    quoteIn.close();
-
-                    JSONObject quoteJson = new JSONObject(quoteResponse.toString());
-                    double currentPrice = quoteJson.optDouble("c", -1);
-                    double pastPrice = quoteJson.optDouble("pc", -1);
-
-                    // 2. News API
-                    LocalDate today = LocalDate.now();
-                    LocalDate weekAgo = today.minusDays(7);
-                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-
-                    URI newsUri = new URI(
-                        "https",
-                        "finnhub.io",
-                        "/api/v1/company-news",
-                        "symbol=" + symbol
-                            + "&from=" + weekAgo.format(formatter)
-                            + "&to=" + today.format(formatter)
-                            + "&token=" + API_KEY,
-                        null
-                    );
-                    URL newsUrl = newsUri.toURL();
-
-                    HttpURLConnection newsConn = (HttpURLConnection) newsUrl.openConnection();
-                    newsConn.setRequestMethod("GET");
-
-                    BufferedReader newsIn = new BufferedReader(new InputStreamReader(newsConn.getInputStream()));
-                    StringBuilder newsResponse = new StringBuilder();
-                    String newsLine;
-                    while ((newsLine = newsIn.readLine()) != null) {
-                        newsResponse.append(newsLine);
-                    }
-                    newsIn.close();
-
-                    JSONArray newsJson = new JSONArray(newsResponse.toString());
-                    StringBuilder newsText = new StringBuilder();
-                    for (int i = 0; i < Math.min(newsJson.length(), 5); i++) {
-                        JSONObject article = newsJson.getJSONObject(i);
-                        newsText.append("• ").append(article.optString("headline")).append("\n");
-                    }
-
-                    detailsText = "Symbol: " + symbol + "\n"
-                            + "Past Price: " + (pastPrice == -1 ? "N/A" : pastPrice) + "\n"
-                            + "Current Price: " + (currentPrice == -1 ? "N/A" : currentPrice) + "\n"
-                            + "Recent News:\n" + (newsText.length() > 0 ? newsText.toString() : "No news found.");
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    detailsText = "Failed to fetch details for " + symbol;
                 }
+                if (details.isEmpty()) details = "Network timeout. Please check your connection.";
                 return null;
             }
 
             @Override
             protected void done() {
                 loadingLabel.setVisible(false);
-                detailArea.setText(detailsText);
+                detailArea.setText(details);
             }
         };
         worker.execute();
     }
 
-    // Custom cell renderer for better stock list appearance
-    static class StockListCellRenderer extends DefaultListCellRenderer {
-        private static final Color EVEN_COLOR = new Color(230, 240, 255);
-        private static final Color ODD_COLOR = Color.WHITE;
-        private static final Color SELECT_BG = new Color(100, 149, 237);
-        private static final Color SELECT_FG = Color.WHITE;
-
-        @Override
-        public Component getListCellRendererComponent(JList<?> list, Object value,
-                                                      int index, boolean isSelected, boolean cellHasFocus) {
-            JLabel label = (JLabel) super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-            label.setBorder(BorderFactory.createEmptyBorder(4, 10, 4, 10));
-            if (isSelected) {
-                label.setBackground(SELECT_BG);
-                label.setForeground(SELECT_FG);
-            } else {
-                label.setBackground((index % 2 == 0) ? EVEN_COLOR : ODD_COLOR);
-                label.setForeground(new Color(25, 25, 112));
-            }
-            label.setFont(new Font("Consolas", Font.PLAIN, 14));
-            return label;
-        }
+    private void styleButton(JButton button) {
+        button.setFocusPainted(false);
+        button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
     }
 }
